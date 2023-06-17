@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -6,7 +8,16 @@ class UUIDMixin(models.Model):
         primary_key=True,
         editable=False,
         unique=True,
+        default=uuid.uuid4,
     )
+
+    def save(self, *args, **kwargs):
+        if not self.__check_uuid():
+            self.id = uuid.uuid4()
+            super(UUIDMixin, self).save(*args, **kwargs)
+
+    def __check_uuid(self) -> bool:
+        return self._meta.model.objects.filter(id=self.id).exists()
 
     class Meta:
         abstract = True
