@@ -5,7 +5,7 @@ from users.models import UserModel
 from wallet.enums import AccountType
 
 
-class AccountModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
+class AccountModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(choices=AccountType.choices(), max_length=20, blank=False, null=False)
     number = models.IntegerField()
@@ -18,7 +18,7 @@ class AccountModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
         ordering = ('open_date',)
 
 
-class WalletModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
+class WalletModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
     name = models.CharField(max_length=100)
     owner = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='wallets')
     accounts = models.ManyToManyField(AccountModel, through='AccountOfWalletModel')
@@ -30,7 +30,7 @@ class WalletModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
         ordering = ('created_at',)
 
 
-class TransactionModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
+class TransactionModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
     account = models.ForeignKey(AccountModel, on_delete=models.CASCADE, related_name='transactions')
     amount_debit = models.DecimalField(max_digits=10, decimal_places=2)
     amount_credit = models.DecimalField(max_digits=10, decimal_places=2)
@@ -43,9 +43,9 @@ class TransactionModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin)
         ordering = ('created_at',)
 
 
-class AccountOfWalletModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
-    account = models.ForeignKey(AccountModel, on_delete=models.CASCADE, related_name='wallets')
-    wallet = models.ForeignKey(WalletModel, on_delete=models.CASCADE, related_name='accounts')
+class AccountOfWalletModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
+    account = models.ForeignKey(AccountModel, on_delete=models.CASCADE)
+    wallet = models.ForeignKey(WalletModel, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Счёт кошелька'
@@ -53,7 +53,7 @@ class AccountOfWalletModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMi
         ordering = ('created_at',)
 
 
-class OperationTypeModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
+class OperationTypeModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
     name = models.CharField(max_length=100)
 
     class Meta:
@@ -62,7 +62,7 @@ class OperationTypeModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixi
         ordering = ('name',)
 
 
-class OperationModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
+class OperationModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
     transaction = models.ForeignKey(TransactionModel, on_delete=models.CASCADE, related_name='operations')
     type = models.ForeignKey(OperationTypeModel, on_delete=models.CASCADE, related_name='operations')
     initiator = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='operations', null=True)
@@ -75,7 +75,7 @@ class OperationModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
         ordering = ('created_at',)
 
 
-class AttachmentModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
+class AttachmentModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
     name = models.CharField(max_length=100)
     file = models.FileField(upload_to='attachments')
     length = models.IntegerField()
@@ -87,9 +87,9 @@ class AttachmentModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
         ordering = ('created_at',)
 
 
-class AttachmentOfOperationModel(models.Model, TimeStampMixin, SoftDeleteMixin, UUIDMixin):
-    attachment = models.ForeignKey(AttachmentModel, on_delete=models.CASCADE, related_name='operations')
-    operation = models.ForeignKey(OperationModel, on_delete=models.CASCADE, related_name='attachments')
+class AttachmentOfOperationModel(TimeStampMixin, SoftDeleteMixin, UUIDMixin, models.Model):
+    attachment = models.ForeignKey(AttachmentModel, on_delete=models.CASCADE)
+    operation = models.ForeignKey(OperationModel, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Вложение операции'
@@ -97,7 +97,7 @@ class AttachmentOfOperationModel(models.Model, TimeStampMixin, SoftDeleteMixin, 
         ordering = ('created_at',)
 
 
-class AggregateAmountOfAccountModel(models.Model, UUIDMixin):
+class AggregateAmountOfAccountModel(UUIDMixin, models.Model):
     account = models.ForeignKey(AccountModel, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(auto_now=True)
