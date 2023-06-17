@@ -12,9 +12,11 @@ class UUIDMixin(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.__check_uuid():
+        if self.__check_uuid():
             self.id = uuid.uuid4()
             super(UUIDMixin, self).save(*args, **kwargs)
+
+        super(UUIDMixin, self).save(*args, **kwargs)
 
     def __check_uuid(self) -> bool:
         return self._meta.model.objects.filter(id=self.id).exists()
