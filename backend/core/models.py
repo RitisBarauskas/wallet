@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils import timezone
 
 
 class UUIDMixin(models.Model):
@@ -11,6 +12,9 @@ class UUIDMixin(models.Model):
         default=uuid.uuid4,
     )
 
+    class Meta:
+        abstract = True
+
     def save(self, *args, **kwargs):
         if self.__check_uuid():
             self.id = uuid.uuid4()
@@ -20,9 +24,6 @@ class UUIDMixin(models.Model):
 
     def __check_uuid(self) -> bool:
         return self._meta.model.objects.filter(id=self.id).exists()
-
-    class Meta:
-        abstract = True
 
 
 class TimeStampMixin(models.Model):
@@ -41,6 +42,15 @@ class SoftDeleteMixin(models.Model):
     is_deleted = models.BooleanField(
         default=False,
     )
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         abstract = True
+
+    def delete(self, *args, **kwargs):
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
