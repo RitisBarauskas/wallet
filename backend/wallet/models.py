@@ -105,3 +105,16 @@ class AggregateAmountOfAccountModel(UUIDMixin, models.Model):
     class Meta:
         verbose_name = 'Сумма агрегата'
         verbose_name_plural = 'Суммы агрегатов'
+
+
+class ReportModel(TimeStampMixin, UUIDMixin, models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    query = models.TextField()
+    created_by = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='reports')
+    file = models.FileField(upload_to='reports')
+
+    class Meta:
+        verbose_name = 'Отчёт'
+        verbose_name_plural = 'Отчёты'
+        ordering = ('created_at',)
