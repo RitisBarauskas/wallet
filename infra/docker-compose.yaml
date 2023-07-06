@@ -1,6 +1,19 @@
 version: '3.7'
 
 services:
+  web:
+    build: ../backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ../backend/:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ../.env
+    depends_on:
+      - redis
+      - db
+
   db:
     image: postgres:14.0
     container_name: database
@@ -11,6 +24,43 @@ services:
       - ../.env
     ports:
       - 5432:5432
+
+  redis:
+    image: redis:7-alpine
+
+  celery:
+    build: ../backend
+    command: celery --app=backend worker --loglevel=info --logfile=logs/celery.log --concurrency=24
+    volumes:
+      - ../backend:/usr/src/app
+    env_file:
+      - ../.env
+    depends_on:
+      - redis
+      - db
+
+  flower:
+    build: ../backend
+    command: celery flower -A backend --port=5555 --broker=redis://redis:6379/0
+    ports:
+      - 5555:5555
+    env_file:
+      - ../.env
+    depends_on:
+      - redis
+      - celery
+
+  celery-beat:
+    build: ../backend
+    command: celery -A backend beat -l info
+    volumes:
+      - ../backend:/usr/src/app
+    env_file:
+      - ../.env
+    depends_on:
+      - redis
+      - db
+      - celery
 
 volumes:
     postgres_data:

@@ -1,49 +1,33 @@
+from celery.result import AsyncResult
+from django.http import JsonResponse
 from rest_framework import permissions, viewsets
 
 from api.serializers import WalletSerializer, AccountSerializer, TransactionSerializer, OperationSerializer, AttachmentSerializer
 from wallet.models import WalletModel, AccountModel, TransactionModel, OperationModel, AttachmentModel
+from api.tasks import test_data, load_data_task
 
 
-class WalletViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows wallets to be viewed or edited.
-    """
-    queryset = WalletModel.objects.all()
-    serializer_class = WalletSerializer
-    permission_classes = [permissions.IsAuthenticated]
+def load_data(request):
+    result = load_data_task.delay(count_users=10, count_operations=100)
+    if result:
+        return JsonResponse({"task_id": result.id}, status=202)
 
 
-class AccountViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows accounts to be viewed or edited.
-    """
-    queryset = AccountModel.objects.all()
-    serializer_class = AccountSerializer
-    permission_classes = [permissions.IsAuthenticated]
+def generate_test_data(request):
+    result = test_data.delay()
+    print(type(result))
+    if result:
+        return JsonResponse({"task_id": result.id}, status=202)
+
+    return JsonResponse({"result": 'Всё пропало, шеф!'}, status=202)
 
 
-class TransactionViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows transactions to be viewed or edited.
-    """
-    queryset = TransactionModel.objects.all()
-    serializer_class = TransactionSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class OperationViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows operations to be viewed or edited.
-    """
-    queryset = OperationModel.objects.all()
-    serializer_class = OperationSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class AttachmentViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows attachments to be viewed or edited.
-    """
-    queryset = AttachmentModel.objects.all()
-    serializer_class = AttachmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+def get_status(request, task_id):
+    task_result = AsyncResult(task_id)
+    print(task_result.__dict__)
+    result = {
+        "task_id": task_id,
+        "task_status": task_result.status,
+        "task_result": task_result.result
+    }
+    return JsonResponse(result, status=200)

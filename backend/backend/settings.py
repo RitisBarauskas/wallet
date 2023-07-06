@@ -2,6 +2,7 @@ import os
 from distutils.util import strtobool
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -112,3 +113,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER', 'redis://redis:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_BROKER', 'redis://redis:6379/0')
+
+CELERY_BEAT_SCHEDULE = {
+    "sample_task": {
+        "task": "api.tasks.test_data",
+        "schedule": crontab(minute="*/1"),
+    },
+}

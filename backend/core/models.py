@@ -15,12 +15,6 @@ class UUIDMixin(models.Model):
     class Meta:
         abstract = True
 
-    def clean(self):
-        super().clean()
-
-    def prepare_database_save(self, field):
-        return super().prepare_database_save(field)
-
     def save(self, *args, **kwargs):
         if self.__check_uuid():
             self.id = uuid.uuid4()
