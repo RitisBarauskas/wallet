@@ -5,10 +5,12 @@ from rest_framework import permissions, viewsets
 from api.serializers import WalletSerializer, AccountSerializer, TransactionSerializer, OperationSerializer, AttachmentSerializer
 from wallet.models import WalletModel, AccountModel, TransactionModel, OperationModel, AttachmentModel
 from api.tasks import test_data, load_data_task
+from wallet.business.trigger.added_new_items_trigger import added_new_items_trigger
 
 
 def load_data(request):
     result = load_data_task.delay(count_users=10, count_operations=100)
+    added_new_items_trigger(1)
     if result:
         return JsonResponse({"task_id": result.id}, status=202)
 

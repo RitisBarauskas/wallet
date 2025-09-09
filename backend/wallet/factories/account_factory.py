@@ -25,7 +25,7 @@ class AccountFactory(DjangoModelFactory):
             kwargs['number'] = cls.get_next_number()
 
         if not kwargs.get('open_date'):
-            kwargs['open_date'] = datetime.now(tz=timezone.utc) - timedelta(days=random.choice(range(100, 10000)))
+            kwargs['open_date'] = datetime.now() - timedelta(days=random.choice(range(100, 10000)))
 
         if not kwargs.get('type'):
             kwargs['type'] = random.choice(AccountType.choices())[0]

@@ -31,10 +31,10 @@ class TransactionFactory(DjangoModelFactory):
     @classmethod
     def generate_date(cls, account: AccountModel):
         last_transaction = account.transactions.last()
-        now = datetime.datetime.now(tz=timezone.utc)
+        now = datetime.datetime.now()
         if last_transaction:
             new_date = last_transaction.date + datetime.timedelta(days=random.choice(range(1, 10)))
-            if datetime.datetime.now(tz=timezone.utc) < new_date:
+            if datetime.datetime.now() < new_date:
                 new_date = now
         else:
             new_date = now

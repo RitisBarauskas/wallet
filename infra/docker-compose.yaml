@@ -18,7 +18,7 @@ services:
     image: postgres:14.0
     container_name: database
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_celery:/var/lib/postgresql/data/
     restart: always
     env_file:
       - ../.env
@@ -30,7 +30,7 @@ services:
 
   celery:
     build: ../backend
-    command: celery --app=backend worker --loglevel=info --logfile=logs/celery.log --concurrency=24
+    command: celery --app=backend worker --loglevel=info --logfile=logs/celery.log --concurrency=10
     volumes:
       - ../backend:/usr/src/app
     env_file:
@@ -63,4 +63,4 @@ services:
       - celery
 
 volumes:
-    postgres_data:
+    postgres_data_celery:
